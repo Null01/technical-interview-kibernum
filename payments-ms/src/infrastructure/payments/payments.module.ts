@@ -9,15 +9,16 @@ import { RejectPaymentUseCase } from '@application/payment/use-cases/reject-paym
 import { FindPaymentUseCase } from '@application/payment/use-cases/find-payment.use-case';
 import { PAYMENT_GATEWAY } from '../gateway/payment-gateway.port';
 import { SimulatedPaymentGateway } from '../gateway/simulated-payment.gateway';
-import { MessagingModule } from '../messaging/messaging.module';
+import { CommonModule }      from '../common/common.module';
+import { MessagingModule }   from '../messaging/messaging.module';
 import { PersistenceModule } from '../persistence/persistence.module';
-import { OutboxModule } from '../outbox/outbox.module';
+import { OutboxModule }      from '../outbox/outbox.module';
 import { HealthHttpController } from './controllers/health.http.controller';
 import { PaymentsHttpController } from './controllers/payments.http.controller';
 import { PaymentEventsKafkaController } from './controllers/payment-events.kafka.controller';
 
 @Module({
-  imports: [PersistenceModule, MessagingModule, OutboxModule],
+  imports: [CommonModule, PersistenceModule, MessagingModule, OutboxModule],
   controllers: [
     HealthHttpController,
     PaymentsHttpController,

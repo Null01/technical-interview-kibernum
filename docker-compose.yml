@@ -145,136 +145,136 @@ services:
 
   # ── Microservices ────────────────────────────────────────────────────────────
 
-#  inventory-ms:
-#    build:
-#      context: ./inventory-ms
-#      target: production
-#    container_name: inventory-ms
-#    ports:
-#      - "${INVENTORY_PORT:-3001}:3001"
-#    environment:
-#      PORT: 3001
-#      NODE_ENV: ${NODE_ENV:-production}
-#      # Kafka
-#      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
-#      KAFKA_CLIENT_ID: inventory
-#      KAFKA_PRODUCER_CLIENT_ID: inventory-producer
-#      KAFKA_CONSUMER_GROUP_ID: inventory-consumer-group
-#      KAFKA_TOPIC_ORDER_CREATED: ${KAFKA_TOPIC_ORDER_CREATED:-order.created}
-#      KAFKA_TOPIC_ORDER_CONFIRMED: ${KAFKA_TOPIC_ORDER_CONFIRMED:-order.confirmed}
-#      KAFKA_TOPIC_ORDER_CANCELLED: ${KAFKA_TOPIC_ORDER_CANCELLED:-order.cancelled}
-#      KAFKA_TOPIC_INVENTORY_VALIDATED: ${KAFKA_TOPIC_INVENTORY_VALIDATED:-inventory.validated}
-#      KAFKA_TOPIC_INVENTORY_INSUFFICIENT: ${KAFKA_TOPIC_INVENTORY_INSUFFICIENT:-inventory.insufficient}
-#      # Database
-#      DB_HOST: postgres
-#      DB_PORT: 5432
-#      DB_USER: ${POSTGRES_USER:-admin}
-#      DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-#      DB_NAME: ${INVENTORY_DB_NAME:-inventory_db}
-#      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
-#      # Outbox relay
-#      OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-5000}
-#    networks:
-#      - microservices-net
-#    depends_on:
-#      kafka:
-#        condition: service_healthy
-#      postgres:
-#        condition: service_healthy
-#    restart: unless-stopped
-#    healthcheck:
-#      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 40s
-#
-#  orders-ms:
-#    build:
-#      context: ./orders-ms
-#      target: production
-#    container_name: orders-ms
-#    ports:
-#      - "${ORDERS_PORT:-3002}:3002"
-#    environment:
-#      PORT: 3002
-#      NODE_ENV: ${NODE_ENV:-production}
-#      # Kafka
-#      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
-#      KAFKA_CLIENT_ID: orders
-#      KAFKA_PRODUCER_CLIENT_ID: orders-producer
-#      KAFKA_CONSUMER_GROUP_ID: orders-consumer-group
-#      KAFKA_TOPIC_ORDER_CREATED: ${KAFKA_TOPIC_ORDER_CREATED:-order.created}
-#      KAFKA_TOPIC_ORDER_CONFIRMED: ${KAFKA_TOPIC_ORDER_CONFIRMED:-order.confirmed}
-#      KAFKA_TOPIC_INVENTORY_VALIDATED: ${KAFKA_TOPIC_INVENTORY_VALIDATED:-inventory.validated}
-#      KAFKA_TOPIC_INVENTORY_INSUFFICIENT: ${KAFKA_TOPIC_INVENTORY_INSUFFICIENT:-inventory.insufficient}
-#      KAFKA_TOPIC_PAYMENT_PROCESSED: ${KAFKA_TOPIC_PAYMENT_PROCESSED:-payment.processed}
-#      KAFKA_TOPIC_ORDER_CANCELLED: ${KAFKA_TOPIC_ORDER_CANCELLED:-order.cancelled}
-#      # Database
-#      DB_HOST: postgres
-#      DB_PORT: 5432
-#      DB_USER: ${POSTGRES_USER:-admin}
-#      DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-#      DB_NAME: ${ORDERS_DB_NAME:-orders_db}
-#      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
-#      # Outbox relay
-#      OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-5000}
-#    networks:
-#      - microservices-net
-#    depends_on:
-#      kafka:
-#        condition: service_healthy
-#      postgres:
-#        condition: service_healthy
-#    restart: unless-stopped
-#    healthcheck:
-#      test: ["CMD-SHELL", "wget -qO- http://localhost:3002/health || exit 1"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 40s
+  inventory-ms:
+    build:
+      context: ./inventory-ms
+      target: production
+    container_name: inventory-ms
+    ports:
+      - "${INVENTORY_PORT:-3001}:3001"
+    environment:
+      PORT: 3001
+      NODE_ENV: ${NODE_ENV:-production}
+      # Kafka
+      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
+      KAFKA_CLIENT_ID: inventory
+      KAFKA_PRODUCER_CLIENT_ID: inventory-producer
+      KAFKA_CONSUMER_GROUP_ID: inventory-consumer-group
+      KAFKA_TOPIC_ORDER_CREATED: ${KAFKA_TOPIC_ORDER_CREATED:-order.created}
+      KAFKA_TOPIC_ORDER_CONFIRMED: ${KAFKA_TOPIC_ORDER_CONFIRMED:-order.confirmed}
+      KAFKA_TOPIC_ORDER_CANCELLED: ${KAFKA_TOPIC_ORDER_CANCELLED:-order.cancelled}
+      KAFKA_TOPIC_INVENTORY_VALIDATED: ${KAFKA_TOPIC_INVENTORY_VALIDATED:-inventory.validated}
+      KAFKA_TOPIC_INVENTORY_INSUFFICIENT: ${KAFKA_TOPIC_INVENTORY_INSUFFICIENT:-inventory.insufficient}
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-admin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+      DB_NAME: ${INVENTORY_DB_NAME:-inventory_db}
+      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
+      # Outbox relay
+      OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-5000}
+    networks:
+      - microservices-net
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-#  payments-ms:
-#    build:
-#      context: ./payments-ms
-#      target: production
-#    container_name: payments-ms
-#    ports:
-#      - "${PAYMENTS_PORT:-3003}:3003"
-#    environment:
-#      PORT: 3003
-#      NODE_ENV: ${NODE_ENV:-production}
-#      # Kafka
-#      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
-#      KAFKA_CLIENT_ID: payments
-#      KAFKA_PRODUCER_CLIENT_ID: payments-producer
-#      KAFKA_CONSUMER_GROUP_ID: payments-consumer-group
-#      KAFKA_TOPIC_ORDER_CONFIRMED: ${KAFKA_TOPIC_ORDER_CONFIRMED:-order.confirmed}
-#      KAFKA_TOPIC_PAYMENT_PROCESSED: ${KAFKA_TOPIC_PAYMENT_PROCESSED:-payment.processed}
-#      KAFKA_TOPIC_PAYMENT_FAILED: ${KAFKA_TOPIC_PAYMENT_FAILED:-payment.failed}
-#      # Database
-#      DB_HOST: postgres
-#      DB_PORT: 5432
-#      DB_USER: ${POSTGRES_USER:-admin}
-#      DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-#      DB_NAME: ${PAYMENTS_DB_NAME:-payments_db}
-#      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
-#      # Outbox relay
-#      OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-5000}
-#    networks:
-#      - microservices-net
-#    depends_on:
-#      kafka:
-#        condition: service_healthy
-#      postgres:
-#        condition: service_healthy
-#    restart: unless-stopped
-#    healthcheck:
-#      test: ["CMD-SHELL", "wget -qO- http://localhost:3003/health || exit 1"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#      start_period: 40s
+  orders-ms:
+    build:
+      context: ./orders-ms
+      target: production
+    container_name: orders-ms
+    ports:
+      - "${ORDERS_PORT:-3002}:3002"
+    environment:
+      PORT: 3002
+      NODE_ENV: ${NODE_ENV:-production}
+      # Kafka
+      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
+      KAFKA_CLIENT_ID: orders
+      KAFKA_PRODUCER_CLIENT_ID: orders-producer
+      KAFKA_CONSUMER_GROUP_ID: orders-consumer-group
+      KAFKA_TOPIC_ORDER_CREATED: ${KAFKA_TOPIC_ORDER_CREATED:-order.created}
+      KAFKA_TOPIC_ORDER_CONFIRMED: ${KAFKA_TOPIC_ORDER_CONFIRMED:-order.confirmed}
+      KAFKA_TOPIC_INVENTORY_VALIDATED: ${KAFKA_TOPIC_INVENTORY_VALIDATED:-inventory.validated}
+      KAFKA_TOPIC_INVENTORY_INSUFFICIENT: ${KAFKA_TOPIC_INVENTORY_INSUFFICIENT:-inventory.insufficient}
+      KAFKA_TOPIC_PAYMENT_PROCESSED: ${KAFKA_TOPIC_PAYMENT_PROCESSED:-payment.processed}
+      KAFKA_TOPIC_ORDER_CANCELLED: ${KAFKA_TOPIC_ORDER_CANCELLED:-order.cancelled}
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-admin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+      DB_NAME: ${ORDERS_DB_NAME:-orders_db}
+      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
+      # Outbox relay
+      OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-5000}
+    networks:
+      - microservices-net
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3002/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  payments-ms:
+    build:
+      context: ./payments-ms
+      target: production
+    container_name: payments-ms
+    ports:
+      - "${PAYMENTS_PORT:-3003}:3003"
+    environment:
+      PORT: 3003
+      NODE_ENV: ${NODE_ENV:-production}
+      # Kafka
+      KAFKA_BROKER: ${KAFKA_BROKER:-kafka:9092}
+      KAFKA_CLIENT_ID: payments
+      KAFKA_PRODUCER_CLIENT_ID: payments-producer
+      KAFKA_CONSUMER_GROUP_ID: payments-consumer-group
+      KAFKA_TOPIC_ORDER_CONFIRMED: ${KAFKA_TOPIC_ORDER_CONFIRMED:-order.confirmed}
+      KAFKA_TOPIC_PAYMENT_PROCESSED: ${KAFKA_TOPIC_PAYMENT_PROCESSED:-payment.processed}
+      KAFKA_TOPIC_PAYMENT_FAILED: ${KAFKA_TOPIC_PAYMENT_FAILED:-payment.failed}
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-admin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+      DB_NAME: ${PAYMENTS_DB_NAME:-payments_db}
+      DB_SYNCHRONIZE: ${DB_SYNCHRONIZE:-true}
+      # Outbox relay
+      OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-5000}
+    networks:
+      - microservices-net
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:3003/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 # ── Volumes & Networks ─────────────────────────────────────────────────────────
 

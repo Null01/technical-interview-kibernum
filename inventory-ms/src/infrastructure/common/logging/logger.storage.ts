@@ -119,6 +119,6 @@ export function buildInitialContext (correlationId?: string): LogContext {
   return {
     transactionId,
     correlationId: correlationId ?? transactionId,
-    service: process.env.SERVICE_NAME ?? 'payments-ms',
+    service: process.env.SERVICE_NAME ?? 'inventory-ms',
   }
 }

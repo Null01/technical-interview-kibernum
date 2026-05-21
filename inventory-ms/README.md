@@ -176,12 +176,6 @@ AppModule
 | `StockMovementModel` | `stock_movements` | Registro **inmutable** append-only de cada movimiento |
 | `BatchModel` | `batches` | Lotes con número de lote y fecha de vencimiento |
 
-**`MovementType` enum:**
-
-```
-PURCHASE | ADJUSTMENT_IN | ADJUSTMENT_OUT | TRANSFER_IN | TRANSFER_OUT | WASTE | RETURN | INITIAL_COUNT
-```
-
 ### Auditoría
 
 Todas las tablas heredan campos de auditoría. `AuditableEntity` provee `created_at`, `updated_at`, `created_by`, `updated_by`. `ImmutableAuditEntity` (para `stock_movements`) solo provee `created_at`, `created_by` ya que los movimientos no se modifican.

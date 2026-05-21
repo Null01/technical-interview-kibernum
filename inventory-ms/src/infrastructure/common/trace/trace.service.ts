@@ -3,14 +3,14 @@
  * @version 0.1
  * @since 2026-05-20
  */
-import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { LogContext } from '../logging/log-context.interface';
+import { Injectable } from '@nestjs/common'
+import { randomUUID } from 'crypto'
+import { LogContext } from '../logging/log-context.interface'
 import {
   runWithLogContext,
   getLogContext,
   enrichLogContext,
-} from '../logging/logger.storage';
+} from '../logging/logger.storage'
 
 /**
  * Manages the per-request LogContext stored in AsyncLocalStorage.
@@ -39,11 +39,6 @@ export class TraceService {
   /** Returns the correlationId for the current request, or a fallback UUID if called outside a scope. */
   getCorrelationId (): string {
     return getLogContext().correlationId ?? randomUUID()
-  }
-
-  /** @deprecated Use getTransactionId() — kept for backward compatibility. */
-  getTraceId (): string {
-    return this.getTransactionId()
   }
 
   /**

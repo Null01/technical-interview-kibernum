@@ -13,6 +13,7 @@ import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
 import { PaymentStatus } from '@domain/payment/enums/payment-status.enum';
 import { PaymentModel } from '@domain/payment/models/payment.model';
 import { RejectPaymentCommand } from '../commands/reject-payment.command';
+import { PaymentFailedEventPayload } from '../events/payment-failed.event-payload';
 import { AppLoggerService } from '../../../infrastructure/common/logging/app-logger.service';
 
 /**
@@ -55,16 +56,18 @@ export class RejectPaymentUseCase {
         failureReason: cmd.failureReason,
       });
 
+      const payload: PaymentFailedEventPayload = {
+        paymentId: payment.id,
+        orderId:   payment.orderId,
+        status:    payment.status,
+        reason:    payment.failureReason,
+      };
+
       await this.outboxRepository.save({
         aggregateType: 'payment',
         aggregateId:   payment.id,
         eventType:     process.env.KAFKA_TOPIC_PAYMENT_FAILED ?? 'payment.failed',
-        payload: {
-          paymentId: payment.id,
-          orderId:   payment.orderId,
-          status:    payment.status,
-          reason:    payment.failureReason,
-        },
+        payload,
       });
     });
 

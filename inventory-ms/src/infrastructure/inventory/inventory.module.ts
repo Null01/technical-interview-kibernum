@@ -9,15 +9,16 @@ import { FindProductUseCase } from '@application/product/use-cases/find-product.
 import { ValidateStockUseCase } from '@application/inventory/use-cases/validate-stock.use-case';
 import { ConfirmStockReservationUseCase } from '@application/inventory/use-cases/confirm-stock-reservation.use-case';
 import { ReleaseStockReservationUseCase } from '@application/inventory/use-cases/release-stock-reservation.use-case';
-import { MessagingModule } from '../messaging/messaging.module';
+import { CommonModule }      from '../common/common.module';
+import { MessagingModule }   from '../messaging/messaging.module';
 import { PersistenceModule } from '../persistence/persistence.module';
-import { OutboxModule } from '../outbox/outbox.module';
+import { OutboxModule }      from '../outbox/outbox.module';
 import { HealthHttpController } from './controllers/health.http.controller';
 import { InventoryEventsKafkaController } from './controllers/inventory-events.kafka.controller';
 import { ProductsHttpController } from './controllers/products.http.controller';
 
 @Module({
-  imports: [PersistenceModule, MessagingModule, OutboxModule],
+  imports: [CommonModule, PersistenceModule, MessagingModule, OutboxModule],
   controllers: [
     ProductsHttpController,
     HealthHttpController,

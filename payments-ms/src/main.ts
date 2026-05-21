@@ -41,7 +41,7 @@ async function bootstrap () {
 
   const config = new DocumentBuilder()
     .setTitle('Payments MS — REST API')
-    .setDescription('API del microservicio de pagos')
+    .setDescription('')
     .setVersion('1.0')
     .addTag('health', 'Estado del servicio')
     .addTag('payments', 'Gestión de pagos')

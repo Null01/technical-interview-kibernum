@@ -13,6 +13,7 @@ import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
 import { PaymentStatus } from '@domain/payment/enums/payment-status.enum';
 import { PaymentModel } from '@domain/payment/models/payment.model';
 import { ProcessPaymentCommand } from '../commands/process-payment.command';
+import { PaymentProcessedEventPayload } from '../events/payment-processed.event-payload';
 import { AppLoggerService } from '../../../infrastructure/common/logging/app-logger.service';
 
 /**
@@ -57,16 +58,18 @@ export class ProcessPaymentUseCase {
         failureReason: null,
       });
 
+      const payload: PaymentProcessedEventPayload = {
+        paymentId:     payment.id,
+        orderId:       payment.orderId,
+        status:        payment.status,
+        transactionId: payment.transactionId,
+      };
+
       await this.outboxRepository.save({
         aggregateType: 'payment',
         aggregateId:   payment.id,
         eventType:     process.env.KAFKA_TOPIC_PAYMENT_PROCESSED ?? 'payment.processed',
-        payload: {
-          paymentId:     payment.id,
-          orderId:       payment.orderId,
-          status:        payment.status,
-          transactionId: payment.transactionId,
-        },
+        payload,
       });
     });
 

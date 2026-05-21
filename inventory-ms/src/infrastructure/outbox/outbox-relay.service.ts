@@ -14,6 +14,7 @@ import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repositor
 import { EVENT_PUBLISHER } from '@domain/shared/ports/event-publisher.port';
 import type { EventPublisherPort } from '@domain/shared/ports/event-publisher.port';
 import { AppLoggerService } from '../common/logging/app-logger.service';
+import { runWithLogContext, buildInitialContext } from '../common/logging/logger.storage';
 
 const BATCH_SIZE = 50;
 
@@ -49,14 +50,19 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     this.logger.debug(`Relaying ${events.length} pending outbox event(s)`);
 
     for (const event of events) {
-      try {
-        await this.eventPublisher.publish(event.eventType, event.payload);
-        await this.outboxRepository.markPublished(event.id);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        this.logger.warn(`Outbox event ${event.id} (${event.eventType}) failed: ${msg}`);
-        await this.outboxRepository.markFailed(event.id, msg);
-      }
+      const storedCorrelationId = event.payload['correlationId'] as string | undefined;
+      const logCtx = buildInitialContext(storedCorrelationId);
+
+      await runWithLogContext(logCtx, async () => {
+        try {
+          await this.eventPublisher.publish(event.eventType, event.payload);
+          await this.outboxRepository.markPublished(event.id);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.warn(`Outbox event ${event.id} (${event.eventType}) failed: ${msg}`);
+          await this.outboxRepository.markFailed(event.id, msg);
+        }
+      });
     }
   }
 }

@@ -12,6 +12,8 @@ import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repositor
 import { UNIT_OF_WORK } from '@domain/shared/ports/unit-of-work.port';
 import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
 import type { ValidateStockCommand } from '../commands/validate-stock.command';
+import { InventoryValidatedEventPayload } from '../events/inventory-validated.event-payload';
+import { InventoryInsufficientEventPayload } from '../events/inventory-insufficient.event-payload';
 import { AppLoggerService } from '../../../infrastructure/common/logging/app-logger.service';
 
 @Injectable()
@@ -36,15 +38,17 @@ export class ValidateStockUseCase {
           command.quantity,
         );
 
+        const validatedPayload: InventoryValidatedEventPayload = {
+          orderId:   command.orderId,
+          productId: command.productId,
+          quantity:  command.quantity,
+        };
+
         await this.outboxRepository.save({
           aggregateType: 'inventory',
           aggregateId:   command.productId,
           eventType:     process.env.KAFKA_TOPIC_INVENTORY_VALIDATED ?? 'inventory.validated',
-          payload: {
-            orderId:   command.orderId,
-            productId: command.productId,
-            quantity:  command.quantity,
-          },
+          payload:       validatedPayload,
         });
       });
 
@@ -58,15 +62,17 @@ export class ValidateStockUseCase {
       this.logger.warn(`Stock insuficiente/error para orden #${command.orderId}: ${reason}`);
 
       await this.unitOfWork.withTransaction(async () => {
+        const insufficientPayload: InventoryInsufficientEventPayload = {
+          orderId:   command.orderId,
+          productId: command.productId,
+          reason,
+        };
+
         await this.outboxRepository.save({
           aggregateType: 'inventory',
           aggregateId:   command.productId,
           eventType:     process.env.KAFKA_TOPIC_INVENTORY_INSUFFICIENT ?? 'inventory.insufficient',
-          payload: {
-            orderId:   command.orderId,
-            productId: command.productId,
-            reason,
-          },
+          payload:       insufficientPayload,
         });
       });
     }
