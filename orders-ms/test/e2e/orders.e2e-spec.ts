@@ -7,7 +7,7 @@ import {
   CUSTOMER,
   PAGEABLE_COUNT,
 } from '../helpers/order.factory';
-import { OrderStatus } from '../../src/domain/order/enums/order-status.enum';
+import { OrderStatus } from '@domain/order/enums/order-status.enum';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Helpers locales
@@ -24,10 +24,6 @@ async function createOrder(
     .expect(201);
   return res.body as Record<string, unknown>;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Suite principal
-// ─────────────────────────────────────────────────────────────────────────────
 
 describe('Orders API (e2e)', () => {
   let app: INestApplication;
@@ -274,7 +270,7 @@ describe('Orders API (e2e)', () => {
   // ───────────────────────────────────────────────────────────────────────────
 
   describe('PATCH /orders/:id/status', () => {
-    it('transiciona de pending a confirmed y escribe evento order.confirmed', async () => {
+    it('transaccion de pending a confirmed y escribe evento order.confirmed', async () => {
       const order = await createOrder(app);
 
       const response = await request(app.getHttpServer())
@@ -289,7 +285,7 @@ describe('Orders API (e2e)', () => {
       expect(events[0].payload).toMatchObject({ orderId: order.id });
     });
 
-    it('transiciona de pending a cancelled y escribe evento order.cancelled', async () => {
+    it('transaccion de pending a cancelled y escribe evento order.cancelled', async () => {
       const order = await createOrder(app);
 
       const response = await request(app.getHttpServer())
@@ -304,7 +300,7 @@ describe('Orders API (e2e)', () => {
       expect(events[0].payload).toMatchObject({ orderId: order.id });
     });
 
-    it('transiciona de confirmed a paid sin generar evento outbox adicional', async () => {
+    it('transaccion de confirmed a paid sin generar evento outbox adicional', async () => {
       const order = await createOrder(app);
       await request(app.getHttpServer())
         .patch(`/orders/${order.id}/status`)

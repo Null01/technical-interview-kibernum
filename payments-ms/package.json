@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --forceExit --runInBand",
     "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage --forceExit --runInBand",
     "test:all:cov": "jest --coverage && jest --config ./test/jest-e2e.json --coverage --forceExit --runInBand",
-    "sonar:dev": "sonar-scanner"
+    "sonar:dev": "npm run test:e2e:cov && sonar-scanner"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
