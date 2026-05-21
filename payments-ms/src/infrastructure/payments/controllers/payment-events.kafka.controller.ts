@@ -49,6 +49,8 @@ export class PaymentEventsKafkaController {
     } else {
       await this.rejectPayment.execute({
         orderId:       data.orderId,
+        productId:     data.productId,
+        quantity:      data.quantity,
         amount:        data.totalAmount,
         failureReason: result.reason ?? 'Pago rechazado por la pasarela',
       });

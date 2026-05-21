@@ -40,7 +40,8 @@ sequenceDiagram
             Note right of OMS: order → PAID
         else Pago rechazado (amount > 500 000 COP)
             PMS -) Kafka: payment.failed
-            Note right of PMS: orders-ms no consume este evento
+            Kafka -) IMS: payment.failed
+            Note right of IMS: Libera reserva de stock
         end
 
     else Stock insuficiente
@@ -64,5 +65,5 @@ sequenceDiagram
 | `order.cancelled`        | orders-ms     | inventory-ms              |
 | `inventory.validated`    | inventory-ms  | orders-ms                 |
 | `inventory.insufficient` | inventory-ms  | orders-ms                 |
-| `payment.processed`      | payments-ms   | inventory-ms, orders-ms   |
-| `payment.failed`         | payments-ms   | inventory-ms, orders-ms   |       
+| `payment.processed`      | payments-ms   | orders-ms                 |
+| `payment.failed`         | payments-ms   | inventory-ms              |

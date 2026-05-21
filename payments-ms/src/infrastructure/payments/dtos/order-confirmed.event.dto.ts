@@ -13,6 +13,13 @@ export class OrderConfirmedEventDto {
   @IsInt()
   orderId: number;
 
+  @IsInt()
+  productId: number;
+
+  @IsNumber()
+  @Min(0.001)
+  quantity: number;
+
   @IsNumber()
   @Min(0.01)
   totalAmount: number;

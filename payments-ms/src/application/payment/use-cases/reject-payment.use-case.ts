@@ -59,6 +59,8 @@ export class RejectPaymentUseCase {
       const payload: PaymentFailedEventPayload = {
         paymentId: payment.id,
         orderId:   payment.orderId,
+        productId: cmd.productId,
+        quantity:  cmd.quantity,
         status:    payment.status,
         reason:    payment.failureReason,
       };

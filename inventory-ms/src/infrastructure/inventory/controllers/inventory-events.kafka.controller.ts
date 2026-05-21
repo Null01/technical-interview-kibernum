@@ -11,6 +11,7 @@ import { ReleaseStockReservationUseCase } from '@application/inventory/use-cases
 import { OrderCreatedEventDto } from '../dtos/order-created.event.dto';
 import { OrderConfirmedEventDto } from '../dtos/order-confirmed.event.dto';
 import { OrderCancelledEventDto } from '../dtos/order-cancelled.event.dto';
+import { PaymentFailedEventDto } from '../dtos/payment-failed.event.dto';
 
 @Controller()
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
@@ -40,6 +41,14 @@ export class InventoryEventsKafkaController {
   @EventPattern(process.env.KAFKA_TOPIC_ORDER_CANCELLED ?? 'order.cancelled')
   handleOrderCancelled(
     @Payload() data: OrderCancelledEventDto,
+    @Ctx() _ctx: KafkaContext,
+  ) {
+    return this.releaseReservation.execute(data);
+  }
+
+  @EventPattern(process.env.KAFKA_TOPIC_PAYMENT_FAILED ?? 'payment.failed')
+  handlePaymentFailed(
+    @Payload() data: PaymentFailedEventDto,
     @Ctx() _ctx: KafkaContext,
   ) {
     return this.releaseReservation.execute(data);
