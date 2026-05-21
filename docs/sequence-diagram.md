@@ -40,6 +40,8 @@ sequenceDiagram
             PMS -) Kafka: payment.failed
             Kafka -) IMS: payment.failed
             Note right of IMS: Libera reserva de stock
+            Kafka -) OMS: payment.failed
+            Note right of OMS: order → CANCELLED
         end
 
     else Stock insuficiente
@@ -64,4 +66,4 @@ sequenceDiagram
 | `inventory.validated`    | inventory-ms  | orders-ms                 |
 | `inventory.insufficient` | inventory-ms  | orders-ms                 |
 | `payment.processed`      | payments-ms   | orders-ms                 |
-| `payment.failed`         | payments-ms   | inventory-ms              |
+| `payment.failed`         | payments-ms   | inventory-ms, orders-ms   |

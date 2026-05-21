@@ -23,6 +23,42 @@ Sistema de gestión de inventario para una tienda de barrio, implementado tres m
 
 ---
 
+## Puesta en marcha
+
+El entorno local está dividido en dos capas independientes de Docker Compose:
+
+| Archivo | Contenido |
+|---|---|
+| `docker-compose.infra.yml` | Kafka, PostgreSQL, Kafka-UI, SonarQube |
+| `docker-compose.yml` | inventory-ms, orders-ms, payments-ms |
+
+Los microservicios se conectan a la infraestructura a través de la red `microservices-net`, definida en el archivo de infra y referenciada como externa en el de servicios.
+
+```bash
+# 1 · Levantar infraestructura (Kafka · PostgreSQL · Kafka-UI · SonarQube)
+docker compose -f docker-compose.infra.yml up
+
+# 2 · Construir y levantar microservicios
+docker compose up -d --build
+
+# Reconstruir un único servicio
+docker compose up -d --build orders-ms
+
+# Ver logs de todos los servicios
+docker compose logs -f
+
+# Detener solo los microservicios (infra sigue corriendo)
+docker compose down
+
+# Detener la infraestructura (datos persisten en volúmenes)
+docker compose -f docker-compose.infra.yml down
+
+# Reset completo — detiene todo y elimina volúmenes
+docker compose -f docker-compose.infra.yml down -v
+```
+
+---
+
 ## Patrones
 
 **Arquitectura Hexagonal (Ports & Adapters)**
