@@ -64,5 +64,5 @@ sequenceDiagram
 | `order.cancelled`        | orders-ms     | inventory-ms              |
 | `inventory.validated`    | inventory-ms  | orders-ms                 |
 | `inventory.insufficient` | inventory-ms  | orders-ms                 |
-| `payment.processed`      | payments-ms   | orders-ms                 |
-| `payment.failed`         | payments-ms   | inventory-ms              |       
+| `payment.processed`      | payments-ms   | inventory-ms, orders-ms   |
+| `payment.failed`         | payments-ms   | inventory-ms, orders-ms   |       
