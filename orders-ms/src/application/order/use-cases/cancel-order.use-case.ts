@@ -11,6 +11,7 @@ import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repositor
 import { UNIT_OF_WORK } from '@domain/shared/ports/unit-of-work.port';
 import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
 import { OrderStatus } from '@domain/order/enums/order-status.enum';
+import { OrderCancelledEventPayload } from '../events/order-cancelled.event-payload';
 
 @Injectable()
 export class CancelOrderUseCase {
@@ -30,15 +31,17 @@ export class CancelOrderUseCase {
     await this.unitOfWork.withTransaction(async () => {
       await this.orderRepository.updateStatus(orderId, OrderStatus.CANCELLED);
 
+      const payload: OrderCancelledEventPayload = {
+        orderId,
+        productId: order.productId,
+        quantity:  order.quantity,
+      };
+
       await this.outboxRepository.save({
         aggregateType: 'order',
         aggregateId:   orderId,
         eventType:     process.env.KAFKA_TOPIC_ORDER_CANCELLED ?? 'order.cancelled',
-        payload: {
-          orderId,
-          productId: order.productId,
-          quantity:  order.quantity,
-        },
+        payload,
       });
     });
   }

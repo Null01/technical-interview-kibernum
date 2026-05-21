@@ -23,7 +23,7 @@ export class KafkaEventPublisher implements EventPublisherPort {
     const { correlationId } = getLogContext();
     const start = Date.now();
 
-    this.logger.log(`→ KAFKA emit topic=${topic} payload=${JSON.stringify(payload)}`);
+    this.logger.log(`→ KAFKA emit topic=${topic} payload=${JSON.stringify(payload)} - correlationId=${correlationId}`);
 
     await lastValueFrom(
       this.kafkaClient.emit(topic, {

@@ -11,6 +11,7 @@ import { OutboxEventModel } from '@domain/shared/outbox/models/outbox-event.mode
 import { OutboxEventStatus } from '@domain/shared/outbox/enums/outbox-event-status.enum';
 import { OutboxEventOrmEntity } from '../entities/outbox-event.orm-entity';
 import { TypeOrmUnitOfWork } from '../unit-of-work.typeorm';
+import { getLogContext } from '../../../common/logging/logger.storage';
 
 // Re-export token so PersistenceModule can reference it from a single import
 export { OUTBOX_REPOSITORY };
@@ -29,8 +30,11 @@ export class OutboxTypeormRepository implements OutboxRepositoryPort {
   }
 
   async save(event: SaveOutboxEventPayload): Promise<void> {
+    const { correlationId } = getLogContext();
+
     const entity = this.getRepo().create({
       ...event,
+      payload: { ...event.payload, correlationId },
       status: OutboxEventStatus.PENDING,
       retries: 0,
       errorMessage: null,

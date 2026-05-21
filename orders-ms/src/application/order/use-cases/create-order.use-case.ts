@@ -13,6 +13,7 @@ import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
 import { OrderStatus } from '@domain/order/enums/order-status.enum';
 import { OrderModel } from '@domain/order/models/order.model';
 import { CreateOrderCommand } from '../commands/create-order.command';
+import { OrderCreatedEventPayload } from '../events/order-created.event-payload';
 
 @Injectable()
 export class CreateOrderUseCase {
@@ -31,17 +32,19 @@ export class CreateOrderUseCase {
     await this.unitOfWork.withTransaction(async () => {
       order = await this.orderRepository.save({ ...cmd, status: OrderStatus.PENDING });
 
+      const payload: OrderCreatedEventPayload = {
+        orderId:     order.id,
+        productId:   order.productId,
+        quantity:    order.quantity,
+        customerId:  order.customerId,
+        totalAmount: order.totalAmount,
+      };
+
       await this.outboxRepository.save({
         aggregateType: 'order',
         aggregateId:   order.id,
         eventType:     process.env.KAFKA_TOPIC_ORDER_CREATED ?? 'order.created',
-        payload: {
-          orderId:     order.id,
-          productId:   order.productId,
-          quantity:    order.quantity,
-          customerId:  order.customerId,
-          totalAmount: order.totalAmount,
-        },
+        payload,
       });
     });
 

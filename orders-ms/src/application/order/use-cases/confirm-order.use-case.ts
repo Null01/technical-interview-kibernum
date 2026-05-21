@@ -11,6 +11,7 @@ import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repositor
 import { UNIT_OF_WORK } from '@domain/shared/ports/unit-of-work.port';
 import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
 import { OrderStatus } from '@domain/order/enums/order-status.enum';
+import { OrderConfirmedEventPayload } from '../events/order-confirmed.event-payload';
 
 @Injectable()
 export class ConfirmOrderUseCase {
@@ -28,17 +29,19 @@ export class ConfirmOrderUseCase {
       const order = await this.orderRepository.updateStatus(orderId, OrderStatus.CONFIRMED);
       if (!order) return;
 
+      const payload: OrderConfirmedEventPayload = {
+        orderId:     order.id,
+        productId:   order.productId,
+        quantity:    order.quantity,
+        totalAmount: order.totalAmount,
+        customerId:  order.customerId,
+      };
+
       await this.outboxRepository.save({
         aggregateType: 'order',
         aggregateId:   order.id,
         eventType:     process.env.KAFKA_TOPIC_ORDER_CONFIRMED ?? 'order.confirmed',
-        payload: {
-          orderId:     order.id,
-          productId:   order.productId,
-          quantity:    order.quantity,
-          totalAmount: order.totalAmount,
-          customerId:  order.customerId,
-        },
+        payload,
       });
     });
   }

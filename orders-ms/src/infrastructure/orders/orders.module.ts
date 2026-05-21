@@ -10,15 +10,16 @@ import { ConfirmOrderUseCase } from '@application/order/use-cases/confirm-order.
 import { CancelOrderUseCase } from '@application/order/use-cases/cancel-order.use-case';
 import { CompleteOrderUseCase } from '@application/order/use-cases/complete-order.use-case';
 import { UpdateOrderStatusUseCase } from '@application/order/use-cases/update-order-status.use-case';
-import { MessagingModule } from '../messaging/messaging.module';
+import { CommonModule }      from '../common/common.module';
+import { MessagingModule }   from '../messaging/messaging.module';
 import { PersistenceModule } from '../persistence/persistence.module';
-import { OutboxModule } from '../outbox/outbox.module';
+import { OutboxModule }      from '../outbox/outbox.module';
 import { HealthHttpController } from './controllers/health.http.controller';
 import { OrdersHttpController } from './controllers/orders.http.controller';
 import { OrderEventsKafkaController } from './controllers/order-events.kafka.controller';
 
 @Module({
-  imports: [PersistenceModule, MessagingModule, OutboxModule],
+  imports: [CommonModule, PersistenceModule, MessagingModule, OutboxModule],
   controllers: [
     OrdersHttpController,
     HealthHttpController,

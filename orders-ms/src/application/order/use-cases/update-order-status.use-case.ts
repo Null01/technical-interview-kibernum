@@ -14,6 +14,8 @@ import { OrderStatus } from '@domain/order/enums/order-status.enum';
 import { OrderModel } from '@domain/order/models/order.model';
 import { OrderNotFoundException } from '@domain/order/exceptions/order-not-found.exception';
 import { InvalidOrderStatusTransitionException } from '@domain/order/exceptions/invalid-order-status-transition.exception';
+import { OrderConfirmedEventPayload } from '../events/order-confirmed.event-payload';
+import { OrderCancelledEventPayload } from '../events/order-cancelled.event-payload';
 
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]:   [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
@@ -47,30 +49,32 @@ export class UpdateOrderStatusUseCase {
       updated = (await this.orderRepository.updateStatus(orderId, newStatus))!;
 
       if (newStatus === OrderStatus.CONFIRMED) {
+        const payload: OrderConfirmedEventPayload = {
+          orderId:     updated.id,
+          productId:   updated.productId,
+          quantity:    updated.quantity,
+          totalAmount: updated.totalAmount,
+          customerId:  updated.customerId,
+        };
         await this.outboxRepository.save({
           aggregateType: 'order',
           aggregateId:   updated.id,
           eventType:     process.env.KAFKA_TOPIC_ORDER_CONFIRMED ?? 'order.confirmed',
-          payload: {
-            orderId:     updated.id,
-            productId:   updated.productId,
-            quantity:    updated.quantity,
-            totalAmount: updated.totalAmount,
-            customerId:  updated.customerId,
-          },
+          payload,
         });
       }
 
       if (newStatus === OrderStatus.CANCELLED) {
+        const payload: OrderCancelledEventPayload = {
+          orderId:   updated.id,
+          productId: updated.productId,
+          quantity:  updated.quantity,
+        };
         await this.outboxRepository.save({
           aggregateType: 'order',
           aggregateId:   updated.id,
           eventType:     process.env.KAFKA_TOPIC_ORDER_CANCELLED ?? 'order.cancelled',
-          payload: {
-            orderId:   updated.id,
-            productId: updated.productId,
-            quantity:  updated.quantity,
-          },
+          payload,
         });
       }
     });

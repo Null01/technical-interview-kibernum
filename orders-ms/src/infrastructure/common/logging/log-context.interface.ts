@@ -34,12 +34,6 @@ export interface LogContext {
   /** Logical service name (e.g. "orders-ms"). */
   service?: string;
 
-  /** HTTP method (GET, POST, PATCH, …). Populated for HTTP requests only. */
-  httpMethod?: string;
-
-  /** HTTP path (e.g. "/orders/42"). Populated for HTTP requests only. */
-  httpPath?: string;
-
   /** Kafka topic. Populated for Kafka messages only. */
   kafkaTopic?: string;
 
