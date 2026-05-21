@@ -2,8 +2,6 @@
 
 Comunicación entre microservicios mediante Apache Kafka.
 
----
-
 ## Flujo de eventos
 
 ```mermaid

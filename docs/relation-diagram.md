@@ -11,8 +11,6 @@
 
 ## inventory\_db — Detalle completo
 
-![Inventory ER](resources/inventory-ER.png)
-
 ```mermaid
 erDiagram
 
@@ -133,8 +131,6 @@ erDiagram
 
 ## orders\_db — Detalle completo
 
-![Orders ER](resources/orders-ER.png)
-
 ```mermaid
 erDiagram
 
@@ -172,8 +168,6 @@ erDiagram
 ---
 
 ## payments\_db — Detalle completo
-
-![Payments ER](resources/payments-ER.png)
 
 ```mermaid
 erDiagram
