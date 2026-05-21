@@ -1,0 +1,80 @@
+/**
+ * @author Andres Duran
+ * @version 0.1
+ * @since 2026-05-20
+ */
+import { Inject, Injectable } from '@nestjs/common';
+import { ORDER_REPOSITORY } from '@domain/order/ports/order.repository.port';
+import type { OrderRepositoryPort } from '@domain/order/ports/order.repository.port';
+import { OUTBOX_REPOSITORY } from '@domain/shared/ports/outbox.repository.port';
+import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repository.port';
+import { UNIT_OF_WORK } from '@domain/shared/ports/unit-of-work.port';
+import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
+import { OrderStatus } from '@domain/order/enums/order-status.enum';
+import { OrderModel } from '@domain/order/models/order.model';
+import { OrderNotFoundException } from '@domain/order/exceptions/order-not-found.exception';
+import { InvalidOrderStatusTransitionException } from '@domain/order/exceptions/invalid-order-status-transition.exception';
+
+const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  [OrderStatus.PENDING]:   [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+  [OrderStatus.CONFIRMED]: [OrderStatus.PAID,      OrderStatus.CANCELLED],
+  [OrderStatus.PAID]:      [],
+  [OrderStatus.CANCELLED]: [],
+};
+
+@Injectable()
+export class UpdateOrderStatusUseCase {
+  constructor(
+    @Inject(ORDER_REPOSITORY)
+    private readonly orderRepository: OrderRepositoryPort,
+    @Inject(OUTBOX_REPOSITORY)
+    private readonly outboxRepository: OutboxRepositoryPort,
+    @Inject(UNIT_OF_WORK)
+    private readonly unitOfWork: UnitOfWorkPort,
+  ) {}
+
+  async execute(orderId: number, newStatus: OrderStatus): Promise<OrderModel> {
+    const current = await this.orderRepository.findById(orderId);
+    if (!current) throw new OrderNotFoundException(orderId);
+
+    if (!ALLOWED_TRANSITIONS[current.status].includes(newStatus)) {
+      throw new InvalidOrderStatusTransitionException(current.status, newStatus);
+    }
+
+    let updated!: OrderModel;
+
+    await this.unitOfWork.withTransaction(async () => {
+      updated = (await this.orderRepository.updateStatus(orderId, newStatus))!;
+
+      if (newStatus === OrderStatus.CONFIRMED) {
+        await this.outboxRepository.save({
+          aggregateType: 'order',
+          aggregateId:   updated.id,
+          eventType:     process.env.KAFKA_TOPIC_ORDER_CONFIRMED ?? 'order.confirmed',
+          payload: {
+            orderId:     updated.id,
+            productId:   updated.productId,
+            quantity:    updated.quantity,
+            totalAmount: updated.totalAmount,
+            customerId:  updated.customerId,
+          },
+        });
+      }
+
+      if (newStatus === OrderStatus.CANCELLED) {
+        await this.outboxRepository.save({
+          aggregateType: 'order',
+          aggregateId:   updated.id,
+          eventType:     process.env.KAFKA_TOPIC_ORDER_CANCELLED ?? 'order.cancelled',
+          payload: {
+            orderId:   updated.id,
+            productId: updated.productId,
+            quantity:  updated.quantity,
+          },
+        });
+      }
+    });
+
+    return updated;
+  }
+}
