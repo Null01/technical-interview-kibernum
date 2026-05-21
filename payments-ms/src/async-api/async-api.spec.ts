@@ -58,7 +58,7 @@ export const ASYNC_API_SPEC = {
       },
     },
     'payment.failed': {
-      description: 'Evento emitido cuando el pago fue rechazado por la pasarela. orders-ms lo consume para cancelar la orden y liberar el stock.',
+      description: 'Evento emitido cuando el pago fue rechazado por la pasarela. orders-ms lo consume para cancelar la orden e inventory-ms lo consume para liberar el stock reservado.',
       publish: {
         operationId: 'publishPaymentFailed',
         summary: 'Pago rechazado — orden cancelada',

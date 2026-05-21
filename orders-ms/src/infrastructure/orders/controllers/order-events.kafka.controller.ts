@@ -11,6 +11,7 @@ import { CompleteOrderUseCase } from '@application/order/use-cases/complete-orde
 import { InventoryValidatedEventDto } from '../dtos/inventory-validated.event.dto';
 import { InventoryInsufficientEventDto } from '../dtos/inventory-insufficient.event.dto';
 import { PaymentProcessedEventDto } from '../dtos/payment-processed.event.dto';
+import { PaymentFailedEventDto } from '../dtos/payment-failed.event.dto';
 
 @Controller()
 export class OrderEventsKafkaController {
@@ -45,5 +46,14 @@ export class OrderEventsKafkaController {
     @Ctx() _ctx: KafkaContext,
   ) {
     return this.completeOrder.execute(data.orderId);
+  }
+
+  @EventPattern(process.env.KAFKA_TOPIC_PAYMENT_FAILED ?? 'payment.failed')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  handlePaymentFailed(
+    @Payload() data: PaymentFailedEventDto,
+    @Ctx() _ctx: KafkaContext,
+  ) {
+    return this.cancelOrder.execute(data.orderId);
   }
 }

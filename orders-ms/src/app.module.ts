@@ -12,14 +12,14 @@ import { AsyncApiModule } from './async-api/async-api.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host:     process.env.DB_HOST     ?? 'localhost',
-      port:     parseInt(process.env.DB_PORT ?? '5432'),
-      username: process.env.DB_USER     ?? 'admin',
-      password: process.env.DB_PASSWORD ?? 'admin123',
-      database: process.env.DB_NAME     ?? 'orders_db',
+      type:             'postgres',
+      host:             process.env.DB_HOST     ?? 'localhost',
+      port:             parseInt(process.env.DB_PORT ?? '5432'),
+      username:         process.env.DB_USER     ?? 'admin',
+      password:         process.env.DB_PASSWORD ?? 'admin123',
+      database:         process.env.DB_NAME     ?? 'orders_db',
       autoLoadEntities: true,
-      synchronize: (process.env.DB_SYNCHRONIZE ?? 'true') === 'true',
+      synchronize:      (process.env.DB_SYNCHRONIZE ?? 'true') === 'true',
     }),
     CommonModule,
     OrdersFeatureModule,

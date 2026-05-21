@@ -12,8 +12,6 @@
  *  - correlationId  → always (propagated via X-Correlation-ID header; equals transactionId
  *                     when this service is the originator)
  *  - spanId         → optional (set for sub-operations: DB calls, outbox publish, etc.)
- *  - service        → always (service name, e.g. "orders-ms")
- *  - environment    → always (NODE_ENV)
  *  - http*          → only during HTTP request handling
  *  - kafka*         → only during Kafka message handling
  */
@@ -30,9 +28,6 @@ export interface LogContext {
 
   /** Optional sub-operation identifier for fine-grained tracing. */
   spanId?: string;
-
-  /** Logical service name (e.g. "orders-ms"). */
-  service?: string;
 
   /** Kafka topic. Populated for Kafka messages only. */
   kafkaTopic?: string;

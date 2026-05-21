@@ -18,9 +18,6 @@ export interface LogContext {
   /** Optional sub-operation identifier for fine-grained tracing. */
   spanId?: string;
 
-  /** Logical service name (e.g. "inventory-ms"). */
-  service?: string;
-
   /** Kafka topic. Populated for Kafka messages only. */
   kafkaTopic?: string;
 

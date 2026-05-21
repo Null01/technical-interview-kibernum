@@ -88,6 +88,25 @@ export const ASYNC_API_SPEC = {
         },
       },
     },
+    'order.cancelled': {
+      description: 'Evento emitido cuando la orden es cancelada (por stock insuficiente o pago fallido). inventory-ms lo consume para liberar la reserva de stock.',
+      publish: {
+        operationId: 'publishOrderCancelled',
+        summary: 'Orden cancelada — liberar reserva de inventario',
+        message: {
+          name: 'OrderCancelled',
+          payload: {
+            type: 'object',
+            properties: {
+              orderId:   { type: 'integer', description: 'ID de la orden',  example: 1001 },
+              productId: { type: 'integer', description: 'ID del producto', example: 42   },
+              quantity:  { type: 'number',  description: 'Cantidad reservada a liberar', example: 5 },
+            },
+            required: ['orderId', 'productId', 'quantity'],
+          },
+        },
+      },
+    },
     'payment.processed': {
       description: 'Evento consumido cuando payments-ms confirma el cobro.',
       subscribe: {
@@ -95,6 +114,23 @@ export const ASYNC_API_SPEC = {
         summary: 'Marcar la orden como pagada',
         message: {
           name: 'PaymentProcessed',
+          payload: {
+            type: 'object',
+            properties: {
+              orderId: { type: 'integer', description: 'ID de la orden', example: 1001 },
+            },
+            required: ['orderId'],
+          },
+        },
+      },
+    },
+    'payment.failed': {
+      description: 'Evento consumido cuando payments-ms rechaza el pago. La orden es cancelada como parte de la compensación de la saga coreografiada.',
+      subscribe: {
+        operationId: 'handlePaymentFailed',
+        summary: 'Cancelar la orden tras rechazo de pago',
+        message: {
+          name: 'PaymentFailed',
           payload: {
             type: 'object',
             properties: {

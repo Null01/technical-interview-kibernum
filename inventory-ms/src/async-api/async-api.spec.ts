@@ -70,5 +70,62 @@ export const ASYNC_API_SPEC = {
         },
       },
     },
+    'order.confirmed': {
+      description: 'Evento consumido cuando orders-ms confirma la orden. El servicio de inventario confirma la reserva de stock (descuenta cantidad física).',
+      subscribe: {
+        operationId: 'handleOrderConfirmed',
+        summary: 'Confirmar reserva de stock para la orden confirmada',
+        message: {
+          name: 'OrderConfirmed',
+          payload: {
+            type: 'object',
+            properties: {
+              orderId:   { type: 'integer', description: 'ID de la orden',   example: 1001 },
+              productId: { type: 'integer', description: 'ID del producto',  example: 42   },
+              quantity:  { type: 'number',  description: 'Cantidad a confirmar', example: 5 },
+            },
+            required: ['orderId', 'productId', 'quantity'],
+          },
+        },
+      },
+    },
+    'order.cancelled': {
+      description: 'Evento consumido cuando orders-ms cancela la orden (por stock insuficiente). El servicio de inventario libera la reserva de stock.',
+      subscribe: {
+        operationId: 'handleOrderCancelled',
+        summary: 'Liberar reserva de stock de la orden cancelada',
+        message: {
+          name: 'OrderCancelled',
+          payload: {
+            type: 'object',
+            properties: {
+              orderId:   { type: 'integer', description: 'ID de la orden',  example: 1001 },
+              productId: { type: 'integer', description: 'ID del producto', example: 42   },
+              quantity:  { type: 'number',  description: 'Cantidad a liberar', example: 5 },
+            },
+            required: ['orderId', 'productId', 'quantity'],
+          },
+        },
+      },
+    },
+    'payment.failed': {
+      description: 'Evento consumido cuando payments-ms rechaza el pago. El servicio de inventario libera la reserva de stock como parte de la compensación de la saga.',
+      subscribe: {
+        operationId: 'handlePaymentFailed',
+        summary: 'Liberar reserva de stock tras rechazo de pago',
+        message: {
+          name: 'PaymentFailed',
+          payload: {
+            type: 'object',
+            properties: {
+              orderId:   { type: 'integer', description: 'ID de la orden',  example: 1001 },
+              productId: { type: 'integer', description: 'ID del producto', example: 42   },
+              quantity:  { type: 'number',  description: 'Cantidad a liberar', example: 5 },
+            },
+            required: ['orderId', 'productId', 'quantity'],
+          },
+        },
+      },
+    },
   },
 };

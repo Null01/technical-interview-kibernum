@@ -21,7 +21,7 @@ import { AppLoggerService }                          from '../common/logging/app
 export class SimulatedPaymentGateway implements PaymentGatewayPort {
   private readonly logger = new AppLoggerService(SimulatedPaymentGateway.name);
 
-  private static readonly APPROVAL_LIMIT = 500_000;
+  private static readonly APPROVAL_LIMIT = 500000;
 
   async charge (orderId: number, amount: number): Promise<GatewayChargeResult> {
     const approved = amount <= SimulatedPaymentGateway.APPROVAL_LIMIT;
