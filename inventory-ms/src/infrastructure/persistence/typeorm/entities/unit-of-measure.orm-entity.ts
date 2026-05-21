@@ -4,7 +4,7 @@
  * @since 2026-05-20
  */
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { UomType } from '@domain/unit-of-measure/models/unit-of-measure.model';
+import { UomType } from '@domain/unit-of-measure/enums/uom-type.enum';
 import { AuditableEntity } from './auditable.orm-entity';
 
 @Entity('units_of_measure')

@@ -6,7 +6,6 @@
 import {
   Inject,
   Injectable,
-  Logger,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
@@ -14,12 +13,13 @@ import { OUTBOX_REPOSITORY } from '@domain/shared/ports/outbox.repository.port';
 import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repository.port';
 import { EVENT_PUBLISHER } from '@domain/shared/ports/event-publisher.port';
 import type { EventPublisherPort } from '@domain/shared/ports/event-publisher.port';
+import { AppLoggerService } from '../common/logging/app-logger.service';
 
 const BATCH_SIZE = 50;
 
 @Injectable()
 export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(OutboxRelayService.name);
+  private readonly logger    = new AppLoggerService(OutboxRelayService.name);
   private intervalRef: ReturnType<typeof setInterval> | null = null;
 
   constructor(
@@ -29,20 +29,20 @@ export class OutboxRelayService implements OnModuleInit, OnModuleDestroy {
     private readonly eventPublisher: EventPublisherPort,
   ) {}
 
-  onModuleInit(): void {
+  onModuleInit (): void {
     const intervalMs = Number(process.env.OUTBOX_POLL_INTERVAL_MS ?? 5000);
     this.intervalRef = setInterval(() => void this.relay(), intervalMs);
     this.logger.log(`Outbox relay started — polling every ${intervalMs}ms`);
   }
 
-  onModuleDestroy(): void {
+  onModuleDestroy (): void {
     if (this.intervalRef) {
       clearInterval(this.intervalRef);
       this.logger.log('Outbox relay stopped');
     }
   }
 
-  async relay(): Promise<void> {
+  async relay (): Promise<void> {
     const events = await this.outboxRepository.findPending(BATCH_SIZE);
     if (!events.length) return;
 

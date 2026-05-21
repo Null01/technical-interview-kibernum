@@ -3,7 +3,7 @@
  * @version 0.1
  * @since 2026-05-20
  */
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { INVENTORY_STOCK_REPOSITORY } from '@domain/inventory/ports/inventory-stock.repository.port';
 import type { InventoryStockRepositoryPort } from '@domain/inventory/ports/inventory-stock.repository.port';
 import { StockInsufficientException } from '@domain/inventory/exceptions/stock-insufficient.exception';
@@ -12,10 +12,11 @@ import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repositor
 import { UNIT_OF_WORK } from '@domain/shared/ports/unit-of-work.port';
 import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
 import type { ValidateStockCommand } from '../commands/validate-stock.command';
+import { AppLoggerService } from '../../../infrastructure/common/logging/app-logger.service';
 
 @Injectable()
 export class ValidateStockUseCase {
-  private readonly logger = new Logger(ValidateStockUseCase.name);
+  private readonly logger = new AppLoggerService(ValidateStockUseCase.name);
 
   constructor(
     @Inject(INVENTORY_STOCK_REPOSITORY)
@@ -26,19 +27,15 @@ export class ValidateStockUseCase {
     private readonly unitOfWork: UnitOfWorkPort,
   ) {}
 
-  async execute(command: ValidateStockCommand): Promise<void> {
+  async execute (command: ValidateStockCommand): Promise<void> {
     try {
       await this.unitOfWork.withTransaction(async () => {
-        // 1. Atomically reserves stock (SELECT FOR UPDATE + reservedQty++) and records
-        //    the RESERVATION movement — all within the active UoW transaction.
         await this.stockRepository.reserveStock(
           command.productId,
           command.orderId,
           command.quantity,
         );
 
-        // 2. Write outbox event in the SAME transaction — guarantees that either
-        //    both the stock reservation and the event record are committed, or neither.
         await this.outboxRepository.save({
           aggregateType: 'inventory',
           aggregateId:   command.productId,
@@ -60,8 +57,6 @@ export class ValidateStockUseCase {
 
       this.logger.warn(`Stock insuficiente/error para orden #${command.orderId}: ${reason}`);
 
-      // Insufficient case: no DB state change to pair with, but we still use the outbox
-      // for at-least-once delivery guarantee on this event.
       await this.unitOfWork.withTransaction(async () => {
         await this.outboxRepository.save({
           aggregateType: 'inventory',

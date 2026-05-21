@@ -3,34 +3,35 @@
  * @version 0.1
  * @since 2026-05-20
  */
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientKafka }        from '@nestjs/microservices';
+import { lastValueFrom }      from 'rxjs';
 import { EventPublisherPort } from '@domain/shared/ports/event-publisher.port';
-import { TraceService } from '../common/trace/trace.service';
+import { AppLoggerService }   from '../common/logging/app-logger.service';
+import { getLogContext }      from '../common/logging/logger.storage';
 
 @Injectable()
 export class KafkaEventPublisher implements EventPublisherPort {
-  private readonly logger = new Logger(KafkaEventPublisher.name);
+  private readonly logger = new AppLoggerService(KafkaEventPublisher.name);
 
-  constructor(
+  constructor (
     @Inject('KAFKA_SERVICE')
     private readonly kafkaClient: ClientKafka,
-    private readonly traceService: TraceService,
   ) {}
 
-  async publish(topic: string, payload: Record<string, unknown>): Promise<void> {
-    const traceId = this.traceService.getTraceId();
+  async publish (topic: string, payload: Record<string, unknown>): Promise<void> {
+    const { correlationId } = getLogContext();
     const start = Date.now();
 
-    this.logger.log(
-      `[${traceId}] → KAFKA emit topic=${topic} payload=${JSON.stringify(payload)}`,
+    this.logger.log(`→ KAFKA emit topic=${topic} payload=${JSON.stringify(payload)}`);
+
+    await lastValueFrom(
+      this.kafkaClient.emit(topic, {
+        headers: correlationId ? { 'x-correlation-id': correlationId } : {},
+        value:   payload,
+      }),
     );
 
-    await lastValueFrom(this.kafkaClient.emit(topic, payload));
-
-    this.logger.log(
-      `[${traceId}] ← KAFKA confirmed topic=${topic} ${Date.now() - start}ms`,
-    );
+    this.logger.log(`← KAFKA confirmed topic=${topic} ${Date.now() - start}ms`);
   }
 }

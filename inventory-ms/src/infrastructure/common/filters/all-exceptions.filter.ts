@@ -9,20 +9,21 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { TraceService } from '../trace/trace.service';
+import { TraceService }      from '../trace/trace.service';
+import { AppLoggerService }  from '../logging/app-logger.service';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
-  private readonly logger = new Logger(AllExceptionsFilter.name);
+  private readonly logger = new AppLoggerService(AllExceptionsFilter.name);
 
-  constructor(private readonly traceService: TraceService) {}
+  constructor (private readonly traceService: TraceService) {}
 
-  catch(exception: unknown, host: ArgumentsHost): void {
-    const traceId = this.traceService.getTraceId();
-    const type = host.getType<'http' | 'rpc'>();
+  catch (exception: unknown, host: ArgumentsHost): void {
+    const transactionId = this.traceService.getTransactionId();
+    const correlationId = this.traceService.getCorrelationId();
+    const type          = host.getType<'http' | 'rpc'>();
 
     if (type === 'http') {
       const ctx = host.switchToHttp();
@@ -40,21 +41,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
           : 'Internal server error';
 
       this.logger.error(
-        `[${traceId}] ${req.method} ${req.url} → ${status}: ${message}`,
+        `${req.method} ${req.url} → ${status}: ${message}`,
         exception instanceof Error ? exception.stack : undefined,
       );
 
       res.status(status).json({
-        statusCode: status,
-        error: HttpStatus[status],
+        statusCode:     status,
+        error:          HttpStatus[status],
         message,
-        traceId,
-        timestamp: new Date().toISOString(),
-        path: req.url,
+        transactionId,
+        correlationId,
+        timestamp:      new Date().toISOString(),
+        path:           req.url,
       });
     } else {
       this.logger.error(
-        `[${traceId}] RPC error: ${exception instanceof Error ? exception.message : String(exception)}`,
+        `RPC error: ${exception instanceof Error ? exception.message : String(exception)}`,
         exception instanceof Error ? exception.stack : undefined,
       );
       throw exception;
