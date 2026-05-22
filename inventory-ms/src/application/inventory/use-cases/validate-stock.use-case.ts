@@ -30,6 +30,14 @@ export class ValidateStockUseCase {
   ) {}
 
   async execute (command: ValidateStockCommand): Promise<void> {
+    const alreadyReserved = await this.stockRepository.hasReservationForOrder(command.orderId);
+    if (alreadyReserved) {
+      this.logger.log(
+        `Stock already reserved for order #${command.orderId} — skipping duplicate event (idempotent)`,
+      );
+      return;
+    }
+
     try {
       await this.unitOfWork.withTransaction(async () => {
         await this.stockRepository.reserveStock(

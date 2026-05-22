@@ -17,6 +17,7 @@ import { OutboxModule }      from '../outbox/outbox.module';
 import { HealthHttpController } from './controllers/health.http.controller';
 import { OrdersHttpController } from './controllers/orders.http.controller';
 import { OrderEventsKafkaController } from './controllers/order-events.kafka.controller';
+import { StaleOrdersJob } from './jobs/stale-orders.job';
 
 @Module({
   imports: [CommonModule, PersistenceModule, MessagingModule, OutboxModule],
@@ -32,6 +33,7 @@ import { OrderEventsKafkaController } from './controllers/order-events.kafka.con
     CancelOrderUseCase,
     CompleteOrderUseCase,
     UpdateOrderStatusUseCase,
+    StaleOrdersJob,
   ],
 })
 export class OrdersFeatureModule {}

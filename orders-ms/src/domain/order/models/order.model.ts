@@ -1,12 +1,13 @@
 import { OrderStatus } from '../enums/order-status.enum';
 
 export interface OrderModel {
-  id: number;
-  productId: number;
-  quantity: number;
-  customerId: number;
+  id:          number;
+  productId:   number;
+  quantity:    number;
+  customerId:  number;
   totalAmount: number;
-  status: OrderStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  status:      OrderStatus;
+  notes:       string | null;
+  createdAt:   Date;
+  updatedAt:   Date;
 }

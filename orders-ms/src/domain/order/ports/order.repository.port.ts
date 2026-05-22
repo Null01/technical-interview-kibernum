@@ -24,5 +24,6 @@ export interface OrderRepositoryPort {
   save(order: Omit<OrderModel, 'id' | 'createdAt' | 'updatedAt'>): Promise<OrderModel>;
   findMany(query: FindOrdersQuery): Promise<PaginatedOrders>;
   findById(id: number): Promise<OrderModel | null>;
-  updateStatus(id: number, status: OrderStatus): Promise<OrderModel | null>;
+  updateStatus(id: number, status: OrderStatus, notes?: string): Promise<OrderModel | null>;
+  findStalePending(olderThanMinutes: number): Promise<OrderModel[]>;
 }

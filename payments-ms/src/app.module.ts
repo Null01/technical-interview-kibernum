@@ -20,6 +20,8 @@ import { AsyncApiModule } from './async-api/async-api.module';
       database:         process.env.DB_NAME     ?? 'payments_db',
       autoLoadEntities: true,
       synchronize:      (process.env.DB_SYNCHRONIZE ?? 'true') === 'true',
+      retryAttempts:    20,
+      retryDelay:       60000,
     }),
     CommonModule,
     PaymentsFeatureModule,

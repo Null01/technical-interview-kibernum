@@ -7,6 +7,13 @@ export interface InventoryStockRepositoryPort {
   save(stock: InventoryStockModel): Promise<InventoryStockModel>;
 
   /**
+   * Returns true if a RESERVATION stock movement already exists for the given
+   * order. Used by ValidateStockUseCase to guarantee idempotency: if Kafka
+   * delivers `order.created` more than once, the second execution is a no-op.
+   */
+  hasReservationForOrder(orderId: number): Promise<boolean>;
+
+  /**
    * Atomically increments reservedQty and records a RESERVATION movement.
    * Throws StockInsufficientException if available stock < qty.
    * Uses a pessimistic write lock to prevent concurrent over-reservation.

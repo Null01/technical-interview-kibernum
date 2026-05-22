@@ -26,6 +26,17 @@ export class InventoryStockTypeormRepository implements InventoryStockRepository
     private readonly dataSource: DataSource,
   ) {}
 
+  async hasReservationForOrder(orderId: number): Promise<boolean> {
+    const count = await this.dataSource
+      .getRepository(StockMovementOrmEntity)
+      .countBy({
+        type:          MovementType.RESERVATION,
+        referenceType: 'order',
+        referenceId:   orderId,
+      });
+    return count > 0;
+  }
+
   async findByProductId(productId: number): Promise<InventoryStockModel | null> {
     const orm = await this.repo.findOneBy({ productId });
     return orm ? this.mapper.toDomain(orm) : null;

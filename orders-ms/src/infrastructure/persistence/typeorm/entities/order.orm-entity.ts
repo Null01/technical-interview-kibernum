@@ -26,4 +26,7 @@ export class OrderOrmEntity extends AuditableEntity {
 
   @Column({ type: 'enum', enum: OrderStatus, enumName: 'order_status', default: OrderStatus.PENDING })
   status: OrderStatus;
+
+  @Column({ type: 'text', nullable: true, default: null })
+  notes: string | null;
 }

@@ -20,6 +20,8 @@ import { CommonModule } from './infrastructure/common/common.module';
       database:         process.env.DB_NAME     ?? 'inventory_db',
       autoLoadEntities: true,
       synchronize:      (process.env.DB_SYNCHRONIZE ?? 'true') === 'true',
+      retryAttempts:    20,
+      retryDelay:       60000,
     }),
     CommonModule,
     InventoryFeatureModule,

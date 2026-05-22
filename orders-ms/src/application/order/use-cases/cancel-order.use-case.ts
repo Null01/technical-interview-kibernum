@@ -24,12 +24,12 @@ export class CancelOrderUseCase {
     private readonly unitOfWork: UnitOfWorkPort,
   ) {}
 
-  async execute(orderId: number): Promise<void> {
+  async execute(orderId: number, notes?: string): Promise<void> {
     const order = await this.orderRepository.findById(orderId);
     if (!order) return;
 
     await this.unitOfWork.withTransaction(async () => {
-      await this.orderRepository.updateStatus(orderId, OrderStatus.CANCELLED);
+      await this.orderRepository.updateStatus(orderId, OrderStatus.CANCELLED, notes);
 
       const payload: OrderCancelledEventPayload = {
         orderId,

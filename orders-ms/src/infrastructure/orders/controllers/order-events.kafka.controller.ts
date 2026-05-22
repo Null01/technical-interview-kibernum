@@ -8,6 +8,7 @@ import { Ctx, EventPattern, KafkaContext, Payload } from '@nestjs/microservices'
 import { ConfirmOrderUseCase } from '@application/order/use-cases/confirm-order.use-case';
 import { CancelOrderUseCase } from '@application/order/use-cases/cancel-order.use-case';
 import { CompleteOrderUseCase } from '@application/order/use-cases/complete-order.use-case';
+import { OrderCancellationReason } from '@domain/order/enums/order-cancellation-reason.enum';
 import { InventoryValidatedEventDto } from '../dtos/inventory-validated.event.dto';
 import { InventoryInsufficientEventDto } from '../dtos/inventory-insufficient.event.dto';
 import { PaymentProcessedEventDto } from '../dtos/payment-processed.event.dto';
@@ -36,7 +37,7 @@ export class OrderEventsKafkaController {
     @Payload() data: InventoryInsufficientEventDto,
     @Ctx() _ctx: KafkaContext,
   ) {
-    return this.cancelOrder.execute(data.orderId);
+    return this.cancelOrder.execute(data.orderId, OrderCancellationReason.INSUFFICIENT_STOCK);
   }
 
   @EventPattern(process.env.KAFKA_TOPIC_PAYMENT_PROCESSED ?? 'payment.processed')
@@ -54,6 +55,6 @@ export class OrderEventsKafkaController {
     @Payload() data: PaymentFailedEventDto,
     @Ctx() _ctx: KafkaContext,
   ) {
-    return this.cancelOrder.execute(data.orderId);
+    return this.cancelOrder.execute(data.orderId, OrderCancellationReason.PAYMENT_FAILED);
   }
 }

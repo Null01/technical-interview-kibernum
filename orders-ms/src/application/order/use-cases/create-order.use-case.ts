@@ -30,7 +30,7 @@ export class CreateOrderUseCase {
     let order!: OrderModel;
 
     await this.unitOfWork.withTransaction(async () => {
-      order = await this.orderRepository.save({ ...cmd, status: OrderStatus.PENDING });
+      order = await this.orderRepository.save({ ...cmd, status: OrderStatus.PENDING, notes: null });
 
       const payload: OrderCreatedEventPayload = {
         orderId:     order.id,

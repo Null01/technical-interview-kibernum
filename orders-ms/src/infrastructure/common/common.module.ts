@@ -9,6 +9,7 @@ import { TraceService }    from './trace/trace.service';
 import { TraceInterceptor } from './trace/trace.interceptor';
 import { AllExceptionsFilter }      from './filters/all-exceptions.filter';
 import { BusinessExceptionFilter }  from './filters/business-exception.filter';
+import { KafkaExceptionFilter }     from './filters/kafka-exception.filter';
 
 @Module({
   providers: [
@@ -24,6 +25,10 @@ import { BusinessExceptionFilter }  from './filters/business-exception.filter';
     {
       provide:  APP_FILTER,
       useClass: BusinessExceptionFilter,
+    },
+    {
+      provide:  APP_FILTER,
+      useClass: KafkaExceptionFilter,
     },
   ],
   exports: [TraceService],

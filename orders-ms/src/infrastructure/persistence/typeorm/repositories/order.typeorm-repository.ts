@@ -5,7 +5,7 @@
  */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { OrderRepositoryPort, FindOrdersQuery, PaginatedOrders } from '@domain/order/ports/order.repository.port';
 import { OrderModel } from '@domain/order/models/order.model';
 import { OrderStatus } from '@domain/order/enums/order-status.enum';
@@ -64,8 +64,21 @@ export class OrderTypeormRepository implements OrderRepositoryPort {
     return entity ? this.mapper.toDomain(entity) : null;
   }
 
-  async updateStatus(id: number, status: OrderStatus): Promise<OrderModel | null> {
-    await this.getRepo().update(id, { status });
+  async updateStatus(id: number, status: OrderStatus, notes?: string): Promise<OrderModel | null> {
+    const patch: Partial<OrderOrmEntity> = { status };
+    if (notes !== undefined) patch.notes = notes;
+    await this.getRepo().update(id, patch);
     return this.findById(id);
+  }
+
+  async findStalePending(olderThanMinutes: number): Promise<OrderModel[]> {
+    const threshold = new Date(Date.now() - olderThanMinutes * 60 * 1000);
+    const entities  = await this.repo.find({
+      where: {
+        status:    OrderStatus.PENDING,
+        createdAt: LessThan(threshold),
+      },
+    });
+    return entities.map(e => this.mapper.toDomain(e));
   }
 }
