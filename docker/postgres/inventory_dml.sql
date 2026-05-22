@@ -1,8 +1,5 @@
 -- ============================================================
 -- inventory_db — DML (seed data)
--- Tienda de barrio colombiana
---
--- Idempotencia: ON CONFLICT (...) DO NOTHING en tablas con UNIQUE.
 -- ============================================================
 
 \c inventory_db;

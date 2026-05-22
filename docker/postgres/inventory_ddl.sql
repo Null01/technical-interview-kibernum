@@ -1,14 +1,5 @@
 -- ============================================================
 -- inventory_db — DDL
--- Proyecto : technical-interview-kibernum / inventory-ms
--- Tablas   : Catálogo (4) + Stock (2)
--- Auditoría: created_at · updated_at · created_by · updated_by
---            (stock_movements solo created_at · created_by — inmutable)
---
--- Idempotencia:
---   · CREATE TABLE   → IF NOT EXISTS
---   · CREATE TYPE    → DO $$ BEGIN ... EXCEPTION WHEN duplicate_object THEN NULL; END $$
---   · CREATE INDEX   → IF NOT EXISTS
 -- ============================================================
 
 \c inventory_db;
@@ -150,6 +141,7 @@ CREATE TABLE IF NOT EXISTS stock_movements (
 CREATE INDEX IF NOT EXISTS idx_movements_product ON stock_movements(product_id);
 CREATE INDEX IF NOT EXISTS idx_movements_type    ON stock_movements(type);
 CREATE INDEX IF NOT EXISTS idx_movements_created ON stock_movements(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_movements_ref     ON stock_movements(reference_type, reference_id, type) WHERE reference_type IS NOT NULL;
 
 
 -- ── outbox_events ──────────────────────────────────────────────────────────

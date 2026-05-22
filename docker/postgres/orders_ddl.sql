@@ -1,22 +1,5 @@
 -- ============================================================
 -- orders_db — DDL
--- Proyecto : technical-interview-kibernum / orders-ms
--- Tablas   : orders
--- Saga     : order.created → inventory.validated → order.confirmed
---            → payment.processed → order paid
---            inventory.insufficient → order cancelled
---
--- Notas de diseño:
---   · product_id referencia products(id) en inventory_db.
---     Al ser bases de datos distintas no existe FK física;
---     la consistencia se garantiza a nivel de aplicación / saga.
---   · customer_id referencia al dominio de clientes (futuro
---     microservicio); mismo tratamiento sin FK física.
---
--- Idempotencia:
---   · CREATE TYPE  → DO $$ ... EXCEPTION WHEN duplicate_object THEN NULL; END $$
---   · CREATE TABLE → IF NOT EXISTS
---   · CREATE INDEX → IF NOT EXISTS
 -- ============================================================
 
 \c orders_db;
@@ -45,6 +28,7 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_id  INTEGER         NOT NULL,
   total_amount NUMERIC(10,2)   NOT NULL,
   status       order_status    NOT NULL DEFAULT 'pending',
+  notes        TEXT            NULL     DEFAULT NULL,
   -- auditoría
   created_at   TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ     NOT NULL DEFAULT NOW()
@@ -57,13 +41,15 @@ COMMENT ON COLUMN orders.quantity     IS 'Cantidad solicitada del producto (3 de
 COMMENT ON COLUMN orders.customer_id  IS 'ID del cliente (futuro microservicio de clientes; sin FK física)';
 COMMENT ON COLUMN orders.total_amount IS 'Monto total de la orden en moneda local (2 decimales)';
 COMMENT ON COLUMN orders.status       IS 'Estado actual: pending | confirmed | paid | cancelled';
+COMMENT ON COLUMN orders.notes        IS 'Razón de cancelación (OrderCancellationReason) cuando status = cancelled; NULL en cualquier otro estado';
 COMMENT ON COLUMN orders.created_at   IS 'Fecha y hora de creación de la orden (UTC)';
 COMMENT ON COLUMN orders.updated_at   IS 'Fecha y hora del último cambio de estado (UTC)';
 
-CREATE INDEX IF NOT EXISTS idx_orders_status   ON orders(status);
-CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
-CREATE INDEX IF NOT EXISTS idx_orders_product  ON orders(product_id);
-CREATE INDEX IF NOT EXISTS idx_orders_created  ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status          ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_customer        ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_product         ON orders(product_id);
+CREATE INDEX IF NOT EXISTS idx_orders_created         ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status_created  ON orders(status, created_at ASC) WHERE status = 'pending';
 
 
 -- ── outbox_events ──────────────────────────────────────────────────────────

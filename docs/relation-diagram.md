@@ -74,7 +74,7 @@ erDiagram
 
     inventory_stock {
         int     id               PK
-        int     product_id       FK "UNIQUE — 1 registro por producto"
+        int     product_id       FK
         numeric quantity
         numeric reserved_qty
         tstz    last_movement_at
@@ -136,11 +136,12 @@ erDiagram
 
     orders {
         int     id           PK
-        int     product_id   "→ inventory_db.products (lógica)"
+        int     product_id   
         numeric quantity
-        int     customer_id  "→ customers-ms futuro (lógica)"
+        int     customer_id  
         numeric total_amount
         enum    status
+        text    notes
         tstz    created_at
         tstz    updated_at
     }
@@ -174,7 +175,7 @@ erDiagram
 
     payments {
         int     id             PK
-        int     order_id       UK "→ orders_db.orders (lógica, UNIQUE)"
+        int     order_id       UK
         numeric amount
         varchar currency
         enum    status

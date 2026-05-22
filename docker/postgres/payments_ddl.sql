@@ -1,17 +1,5 @@
 -- ============================================================
 -- payments_db — DDL
--- Proyecto : technical-interview-kibernum / payments-ms
--- Tablas   : payments, outbox_events
---
--- Diseño de idempotencia:
---   · payments.order_id tiene restricción UNIQUE. Solo puede existir
---     un pago por orden, garantizando que re-entregas del evento
---     `order.confirmed` no generen cobros duplicados.
---
--- Flujo saga Kafka:
---   order.confirmed (orders-ms) → payments-ms
---     └─ APPROVED → payment.processed → orders-ms (→ order.paid)
---     └─ REJECTED → payment.failed    → orders-ms (→ order.cancelled)
 -- ============================================================
 
 \c payments_db;

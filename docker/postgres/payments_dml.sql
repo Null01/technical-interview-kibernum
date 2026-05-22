@@ -1,9 +1,5 @@
 -- ============================================================
 -- payments_db — DML (seed data)
--- Tienda de barrio colombiana — pagos de ejemplo
---
--- Idempotencia:
---   Solo inserta si la tabla está vacía (WHERE NOT EXISTS).
 -- ============================================================
 
 \c payments_db;
