@@ -3,8 +3,9 @@
  * @version 0.1
  * @since 2026-05-20
  */
-import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, UseFilters, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Ctx, EventPattern, KafkaContext, Payload } from '@nestjs/microservices';
+import { KafkaExceptionFilter } from '../../common/filters/kafka-exception.filter';
 import { ConfirmOrderUseCase } from '@application/order/use-cases/confirm-order.use-case';
 import { CancelOrderUseCase } from '@application/order/use-cases/cancel-order.use-case';
 import { CompleteOrderUseCase } from '@application/order/use-cases/complete-order.use-case';
@@ -15,6 +16,7 @@ import { PaymentProcessedEventDto } from '../dtos/payment-processed.event.dto';
 import { PaymentFailedEventDto } from '../dtos/payment-failed.event.dto';
 
 @Controller()
+@UseFilters(KafkaExceptionFilter)
 export class OrderEventsKafkaController {
   constructor(
     private readonly confirmOrder: ConfirmOrderUseCase,

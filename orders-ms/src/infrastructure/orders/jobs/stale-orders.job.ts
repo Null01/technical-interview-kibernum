@@ -6,8 +6,8 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { CancelOrderUseCase } from '@application/order/use-cases/cancel-order.use-case'
 import { OrderCancellationReason } from '@domain/order/enums/order-cancellation-reason.enum'
-import { ORDER_REPOSITORY } from '@domain/order/ports/order.repository.port'
-import type { OrderRepositoryPort } from '@domain/order/ports/order.repository.port'
+import { ORDER_COMMAND_REPOSITORY } from '@domain/order/ports/order-command.repository.port'
+import type { OrderCommandRepositoryPort } from '@domain/order/ports/order-command.repository.port'
 import { Inject } from '@nestjs/common'
 import { AppLoggerService } from '../../common/logging/app-logger.service'
 import { buildInitialContext, runWithLogContext } from '../../common/logging/logger.storage'
@@ -18,8 +18,8 @@ export class StaleOrdersJob implements OnModuleInit, OnModuleDestroy {
   private intervalRef: ReturnType<typeof setInterval> | null = null
 
   constructor (
-    @Inject(ORDER_REPOSITORY)
-    private readonly orderRepository: OrderRepositoryPort,
+    @Inject(ORDER_COMMAND_REPOSITORY)
+    private readonly orderRepository: OrderCommandRepositoryPort,
     private readonly cancelOrder: CancelOrderUseCase,
   ) {}
 

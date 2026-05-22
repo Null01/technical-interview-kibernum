@@ -9,7 +9,12 @@ import { TraceService }    from './trace/trace.service';
 import { TraceInterceptor } from './trace/trace.interceptor';
 import { AllExceptionsFilter }      from './filters/all-exceptions.filter';
 import { BusinessExceptionFilter }  from './filters/business-exception.filter';
-import { KafkaExceptionFilter }     from './filters/kafka-exception.filter';
+
+// KafkaExceptionFilter NO se registra aquí como APP_FILTER global porque
+// @Catch() (catch-all) interceptaría también las excepciones HTTP y bloquearía
+// BusinessExceptionFilter. En su lugar se aplica directamente sobre
+// OrderEventsKafkaController con @UseFilters(), donde el filtro de controlador
+// tiene precedencia sobre los filtros globales.
 
 @Module({
   providers: [
@@ -25,10 +30,6 @@ import { KafkaExceptionFilter }     from './filters/kafka-exception.filter';
     {
       provide:  APP_FILTER,
       useClass: BusinessExceptionFilter,
-    },
-    {
-      provide:  APP_FILTER,
-      useClass: KafkaExceptionFilter,
     },
   ],
   exports: [TraceService],
