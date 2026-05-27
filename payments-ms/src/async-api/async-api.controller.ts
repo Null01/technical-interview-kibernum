@@ -6,7 +6,7 @@
 import { Controller, Get, Header, Res } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { ASYNC_API_SPEC } from './async-api.spec';
+import { ASYNC_API_SPEC } from './async-api.constants';
 
 @ApiExcludeController()
 @Controller('async-api')

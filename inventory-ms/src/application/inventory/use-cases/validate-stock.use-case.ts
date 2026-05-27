@@ -83,6 +83,8 @@ export class ValidateStockUseCase {
           payload:       insufficientPayload,
         });
       });
+
+     throw err;
     }
   }
 }
