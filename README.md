@@ -81,7 +81,7 @@ cd inventory-ms   # o orders-ms / payments-ms
 npm run test
 
 # Con cobertura
-npm run test:cov
+npm run test:all:cov
 ```
 
 ---
