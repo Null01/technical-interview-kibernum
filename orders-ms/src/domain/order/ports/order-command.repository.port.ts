@@ -10,7 +10,5 @@ export const ORDER_COMMAND_REPOSITORY = 'ORDER_COMMAND_REPOSITORY';
 
 export interface OrderCommandRepositoryPort {
   save(order: Omit<OrderModel, 'id' | 'createdAt' | 'updatedAt'>): Promise<OrderModel>;
-  findById(id: number): Promise<OrderModel | null>;
   updateStatus(id: number, status: OrderStatus, notes?: string): Promise<OrderModel | null>;
-  findStalePending(olderThanMinutes: number): Promise<OrderModel[]>;
 }

@@ -16,6 +16,7 @@ import { OrderNotFoundException } from '@domain/order/exceptions/order-not-found
 import { InvalidOrderStatusTransitionException } from '@domain/order/exceptions/invalid-order-status-transition.exception';
 import { OrderConfirmedEventPayload } from '../events/order-confirmed.event-payload';
 import { OrderCancelledEventPayload } from '../events/order-cancelled.event-payload';
+import { ORDER_QUERY_REPOSITORY, type OrderQueryRepositoryPort } from '@domain/order/ports/order-query.repository.port'
 
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.PENDING]:   [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
@@ -28,7 +29,9 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 export class UpdateOrderStatusUseCase {
   constructor(
     @Inject(ORDER_COMMAND_REPOSITORY)
-    private readonly orderRepository: OrderCommandRepositoryPort,
+    private readonly orderCommandRepositoryPort: OrderCommandRepositoryPort,
+    @Inject(ORDER_QUERY_REPOSITORY)
+    private readonly orderQueryRepositoryPort: OrderQueryRepositoryPort,
     @Inject(OUTBOX_REPOSITORY)
     private readonly outboxRepository: OutboxRepositoryPort,
     @Inject(UNIT_OF_WORK)
@@ -36,17 +39,17 @@ export class UpdateOrderStatusUseCase {
   ) {}
 
   async execute(orderId: number, newStatus: OrderStatus): Promise<OrderModel> {
-    const current = await this.orderRepository.findById(orderId);
-    if (!current) throw new OrderNotFoundException(orderId);
-
-    if (!ALLOWED_TRANSITIONS[current.status].includes(newStatus)) {
-      throw new InvalidOrderStatusTransitionException(current.status, newStatus);
-    }
-
     let updated!: OrderModel;
 
     await this.unitOfWork.withTransaction(async () => {
-      updated = (await this.orderRepository.updateStatus(orderId, newStatus))!;
+      const current = await this.orderQueryRepositoryPort.findById(orderId);
+      if (!current) throw new OrderNotFoundException(orderId);
+
+      if (!ALLOWED_TRANSITIONS[current.status].includes(newStatus)) {
+        throw new InvalidOrderStatusTransitionException(current.status, newStatus);
+      }
+
+      updated = (await this.orderCommandRepositoryPort.updateStatus(orderId, newStatus))!;
 
       if (newStatus === OrderStatus.CONFIRMED) {
         const payload: OrderConfirmedEventPayload = {

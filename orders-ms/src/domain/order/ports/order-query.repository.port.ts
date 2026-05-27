@@ -5,6 +5,7 @@
  */
 import { OrderStatus } from '../enums/order-status.enum';
 import { OrderReadModel, PaginatedOrderReadModels } from '../models/order-read.model';
+import { OrderModel } from '@domain/order/models/order.model'
 
 export type { OrderReadModel, PaginatedOrderReadModels };
 
@@ -23,4 +24,5 @@ export interface FindOrdersQuery {
 export interface OrderQueryRepositoryPort {
   findMany(query: FindOrdersQuery): Promise<PaginatedOrderReadModels>;
   findById(id: number): Promise<OrderReadModel | null>;
+  findStalePending(olderThanMinutes: number): Promise<OrderModel[]>;
 }

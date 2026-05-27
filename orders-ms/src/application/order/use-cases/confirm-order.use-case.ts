@@ -17,7 +17,7 @@ import { OrderConfirmedEventPayload } from '../events/order-confirmed.event-payl
 export class ConfirmOrderUseCase {
   constructor(
     @Inject(ORDER_COMMAND_REPOSITORY)
-    private readonly orderRepository: OrderCommandRepositoryPort,
+    private readonly orderCommandRepositoryPort: OrderCommandRepositoryPort,
     @Inject(OUTBOX_REPOSITORY)
     private readonly outboxRepository: OutboxRepositoryPort,
     @Inject(UNIT_OF_WORK)
@@ -26,7 +26,7 @@ export class ConfirmOrderUseCase {
 
   async execute(orderId: number): Promise<void> {
     await this.unitOfWork.withTransaction(async () => {
-      const order = await this.orderRepository.updateStatus(orderId, OrderStatus.CONFIRMED);
+      const order = await this.orderCommandRepositoryPort.updateStatus(orderId, OrderStatus.CONFIRMED);
       if (!order) return;
 
       const payload: OrderConfirmedEventPayload = {

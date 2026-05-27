@@ -6,11 +6,10 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { CancelOrderUseCase } from '@application/order/use-cases/cancel-order.use-case'
 import { OrderCancellationReason } from '@domain/order/enums/order-cancellation-reason.enum'
-import { ORDER_COMMAND_REPOSITORY } from '@domain/order/ports/order-command.repository.port'
-import type { OrderCommandRepositoryPort } from '@domain/order/ports/order-command.repository.port'
 import { Inject } from '@nestjs/common'
 import { AppLoggerService } from '../../common/logging/app-logger.service'
 import { buildInitialContext, runWithLogContext } from '../../common/logging/logger.storage'
+import { ORDER_QUERY_REPOSITORY, type OrderQueryRepositoryPort } from '@domain/order/ports/order-query.repository.port'
 
 @Injectable()
 export class StaleOrdersJob implements OnModuleInit, OnModuleDestroy {
@@ -18,8 +17,8 @@ export class StaleOrdersJob implements OnModuleInit, OnModuleDestroy {
   private intervalRef: ReturnType<typeof setInterval> | null = null
 
   constructor (
-    @Inject(ORDER_COMMAND_REPOSITORY)
-    private readonly orderRepository: OrderCommandRepositoryPort,
+    @Inject(ORDER_QUERY_REPOSITORY)
+    private readonly orderQueryRepositoryPort: OrderQueryRepositoryPort,
     private readonly cancelOrder: CancelOrderUseCase,
   ) {}
 
@@ -44,7 +43,7 @@ export class StaleOrdersJob implements OnModuleInit, OnModuleDestroy {
     const timeoutOrdersExpired = this.timeoutOrdersExpiredMinutes()
 
     await runWithLogContext(ctx, async () => {
-      const stale = await this.orderRepository.findStalePending(timeoutOrdersExpired)
+      const stale = await this.orderQueryRepositoryPort.findStalePending(timeoutOrdersExpired)
 
       if (!stale.length) return
 

@@ -2,17 +2,6 @@
  * @author Andres Duran
  * @version 0.1
  * @since 2026-05-20
- *
- * Implementación TypeORM del repositorio de órdenes.
- *
- * Implementa ambos puertos CQRS con una sola clase (CQRS lógico):
- *   · OrderCommandRepositoryPort — operaciones de escritura + lecturas internas
- *     del command side (findById para validar estado, findStalePending para el job).
- *   · OrderQueryRepositoryPort   — operaciones de lectura optimizadas, devuelve
- *     OrderReadModel en lugar del agregado de dominio.
- *
- * En una evolución futura (CQRS físico) se podría extraer una segunda clase
- * que apunte a una réplica de lectura y se registre bajo ORDER_QUERY_REPOSITORY.
  */
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'

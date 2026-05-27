@@ -3,46 +3,44 @@
  * @version 0.1
  * @since 2026-05-20
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { ORDER_COMMAND_REPOSITORY } from '@domain/order/ports/order-command.repository.port';
-import type { OrderCommandRepositoryPort } from '@domain/order/ports/order-command.repository.port';
-import { OUTBOX_REPOSITORY } from '@domain/shared/ports/outbox.repository.port';
-import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repository.port';
-import { UNIT_OF_WORK } from '@domain/shared/ports/unit-of-work.port';
-import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port';
-import { OrderStatus } from '@domain/order/enums/order-status.enum';
-import { OrderCancelledEventPayload } from '../events/order-cancelled.event-payload';
+import { Inject, Injectable } from '@nestjs/common'
+import { ORDER_COMMAND_REPOSITORY } from '@domain/order/ports/order-command.repository.port'
+import type { OrderCommandRepositoryPort } from '@domain/order/ports/order-command.repository.port'
+import { OUTBOX_REPOSITORY } from '@domain/shared/ports/outbox.repository.port'
+import type { OutboxRepositoryPort } from '@domain/shared/ports/outbox.repository.port'
+import { UNIT_OF_WORK } from '@domain/shared/ports/unit-of-work.port'
+import type { UnitOfWorkPort } from '@domain/shared/ports/unit-of-work.port'
+import { OrderStatus } from '@domain/order/enums/order-status.enum'
+import { OrderCancelledEventPayload } from '../events/order-cancelled.event-payload'
 
 @Injectable()
 export class CancelOrderUseCase {
-  constructor(
+  constructor (
     @Inject(ORDER_COMMAND_REPOSITORY)
-    private readonly orderRepository: OrderCommandRepositoryPort,
+    private readonly orderCommandRepositoryPort: OrderCommandRepositoryPort,
     @Inject(OUTBOX_REPOSITORY)
     private readonly outboxRepository: OutboxRepositoryPort,
     @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: UnitOfWorkPort,
   ) {}
 
-  async execute(orderId: number, notes?: string): Promise<void> {
-    const order = await this.orderRepository.findById(orderId);
-    if (!order) return;
-
+  async execute (orderId: number, notes?: string): Promise<void> {
     await this.unitOfWork.withTransaction(async () => {
-      await this.orderRepository.updateStatus(orderId, OrderStatus.CANCELLED, notes);
+      const order = await this.orderCommandRepositoryPort.updateStatus(orderId, OrderStatus.CANCELLED, notes)
+      if (!order) return
 
       const payload: OrderCancelledEventPayload = {
-        orderId,
+        orderId:   order.id,
         productId: order.productId,
         quantity:  order.quantity,
-      };
+      }
 
       await this.outboxRepository.save({
         aggregateType: 'order',
-        aggregateId:   orderId,
+        aggregateId:   order.id,
         eventType:     process.env.KAFKA_TOPIC_ORDER_CANCELLED ?? 'order.cancelled',
         payload,
-      });
-    });
+      })
+    })
   }
 }
